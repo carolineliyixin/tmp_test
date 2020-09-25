@@ -16,16 +16,17 @@ typedef struct PCB {
     int             priority;           // process's priority
     P1_State        state;              // state of the PCB
     // more fields here
-    int used;
+    int             used;  
+    PCB             *child;
 } PCB;
 
 static PCB processTable[P1_MAXPROC];   // the process table
-static int currentPid = -1;
+static PCB readyTable[P1_MAXPROC];   // the ready process table
+static int currentPid;
 
 static void IllegalInstructionHandler() {
     P1_Quit(1024);
 }
-
 
 /*
  * Help to check the mode
@@ -54,9 +55,11 @@ void P1ProcInit(void)
         processTable[i].priority = 0;
         processTable[i].used = 0;
         *processTable[i].name = '\0';
+        processTable[i].child = NULL;
     }
     // initialize everything else
-
+    memset(readyTable, 0, sizeof(readyTable));
+    currentPid = 0;
 }
 
 int P1_GetPid(void) 
@@ -126,12 +129,22 @@ void
 P1_Quit(int status) 
 {
     // check for kernel mode
+    checkIfKernelMode();
+
     // disable interrupts
+    int is_enabled = P1DisableInterrupts();
+
     // remove from ready queue, set status to P1_STATE_QUIT
+    
+
     // if first process verify it doesn't have children, otherwise give children to first process
+    if (!processTable[0].child)
+        processTable[0].child = processTable[currentPid].child;
     // add ourself to list of our parent's children that have quit
+    
     // if parent is in state P1_STATE_JOINING set its state to P1_STATE_READY
     P1Dispatch(FALSE);
+
     // should never get here
     assert(0);
 }
@@ -158,6 +171,7 @@ P1Dispatch(int rotate)
 {
     // select the highest-priority runnable process
     // call P1ContextSwitch to switch to that process
+    // 应该设置一下每个PCB的child。。。？
 }
 
 int
