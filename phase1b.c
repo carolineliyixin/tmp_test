@@ -17,7 +17,6 @@ typedef struct PCB {
     P1_State        state;              // state of the PCB
     // more fields here
     int             used;  
-    PCB             *child;
 } PCB;
 
 static PCB processTable[P1_MAXPROC];   // the process table
@@ -55,7 +54,6 @@ void P1ProcInit(void)
         processTable[i].priority = 0;
         processTable[i].used = 0;
         *processTable[i].name = '\0';
-        processTable[i].child = NULL;
     }
     // initialize everything else
     memset(readyTable, 0, sizeof(readyTable));
@@ -132,14 +130,13 @@ P1_Quit(int status)
     checkIfKernelMode();
 
     // disable interrupts
-    int is_enabled = P1DisableInterrupts();
+    // int is_enabled = P1DisableInterrupts();
 
     // remove from ready queue, set status to P1_STATE_QUIT
     
 
     // if first process verify it doesn't have children, otherwise give children to first process
-    if (!processTable[0].child)
-        processTable[0].child = processTable[currentPid].child;
+
     // add ourself to list of our parent's children that have quit
     
     // if parent is in state P1_STATE_JOINING set its state to P1_STATE_READY
@@ -171,7 +168,7 @@ P1Dispatch(int rotate)
 {
     // select the highest-priority runnable process
     // call P1ContextSwitch to switch to that process
-    // 应该设置一下每个PCB的child。。。？
+
 }
 
 int
